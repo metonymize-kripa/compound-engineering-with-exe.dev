@@ -1,13 +1,11 @@
-# Compound Engineering for exe.dev
+# Compound Engineering (Local)
 
-This repo provides a local Compound Engineering setup that mirrors the upstream plugin as closely as possible, but works with Shelley.
+This repo is a **local Compound Engineering playbook** for Shelley.
 
-## What you get
-
-- **Commands**: `/workflows:*` and other compound commands under `commands/`
-- **Agents**: Local copies under `agents/`
-- **Skills**: Local skills under `docs/skills/`
-- **Runner**: `ce` script to expand commands into Shelley-ready prompts
+## Mental model (short)
+- **Playbook** (this repo): defaults you can reuse across projects.
+- **Project**: gets its **own copy** of files (`AGENTS.md`, `CLAUDE.md`, `TODO.md`, `docs/`).
+- **Learnings** live in the project. You **promote** the best ones to the playbook manually.
 
 ## Quick start
 
@@ -17,34 +15,23 @@ cd /path/to/project
 ~/compound-engineering/install.sh
 ```
 
-By default, the installer **copies** files into your project (per‑project skills). Use `--mode link` for a global shared playbook.
-
-## Running commands with Shelley
+## Run commands with Shelley
 
 ```bash
 ~/compound-engineering/ce /workflows:plan
 ~/compound-engineering/ce /workflows:review
 ```
 
-The runner outputs a composite prompt that includes the command plus configured review agents (batch mode) so it feels similar to Claude’s parallel agent reviews.
+## Promote learnings to global playbook
 
-## Configure review agents
+```bash
+# diff local vs global skills
+~/compound-engineering/ce diff-skills /path/to/project
 
-Create or edit `compound-engineering.local.md` in your project root:
-
-```yaml
----
-review_agents:
-  - security-sentinel
-  - performance-oracle
-  - architecture-strategist
-  - code-simplicity-reviewer
----
-
-Add optional review context below this line.
+# copy a project skill into the global playbook
+~/compound-engineering/ce promote-skill /path/to/project docs/skills/my-skill.md
 ```
 
 ## Upstream references
-
-- Compound Engineering plugin: https://github.com/EveryInc/compound-engineering-plugin
-- Guide: https://every.to/guides/compound-engineering
+- https://github.com/EveryInc/compound-engineering-plugin
+- https://every.to/guides/compound-engineering

@@ -1,113 +1,44 @@
-# Getting Started with Compound Engineering
+# Getting Started
 
-Compound Engineering is a lightweight workflow for long-running projects. It makes work durable by combining agent behaviors, atomic tasks, and a living skill map.
+## Mental model
+- The **playbook** (this repo) is a shared template.
+- Each **project** gets its own copy of the files and skills.
+- Learnings are written into the project’s `docs/skills/`.
+- You **promote** the best skills back into the playbook manually.
 
-## Quick Start (per VM)
-
-1. **Clone the repo** (once per VM):
-   ```bash
-   git clone git@github.com:metonymize-kripa/compound-engineering-with-exe.dev.git ~/compound-engineering
-   ```
-
-2. **Link into a project** (run inside your project directory):
-   ```bash
-   ~/compound-engineering/install.sh
-   ```
-   This creates symlinks for:
-   - `AGENTS.md`
-   - `CLAUDE.md`
-   - `TODO.md`
-   - `docs/`
-
-3. **Start working**:
-   - Use `/workflows:plan` to expand a feature into atomic tasks in `TODO.md`.
-   - Use `/workflows:work` to execute the top task.
-   - Use `/workflows:review` for a multi-perspective audit.
-   - Use `/workflows:compound` to capture residual value into `docs/skills/`.
-
-4. **Use local agents** (offline-friendly):
-   - Local copies live in `agents/`.
-   - See `AGENTS_INDEX.md` for a quick list.
-
-## Conventions
-
-- **Atomic commits**: small, verifiable changes.
-- **Skill map**: every hard-earned insight goes into `docs/skills/`.
-- **Persistence first**: assume multi-session work; make the next session easier.
-
-## Troubleshooting
-
-- Existing files? Re-run with `--force`:
-  ```bash
-  ~/compound-engineering/install.sh --force
-  ```
-- Custom location? Use `--ce-dir`:
-  ```bash
-  ~/compound-engineering/install.sh --ce-dir /opt/compound-engineering
-  ```
-
-## More from Every
-
-- **Compound Engineering Plugin (source):**
-  https://github.com/EveryInc/compound-engineering-plugin
-- **Compound Engineering Guide:**
-  https://every.to/guides/compound-engineering
-
----
-
-If you want a one-liner bootstrap or a template repo for new projects, open an issue and we’ll add it.
-
-## Local Command Runner (Shelley)
-
-Use the `ce` script to expand Compound Engineering commands into a Shelley-ready prompt.
+## Setup (per VM)
 
 ```bash
-# From any project directory with compound-engineering linked
-~/compound-engineering/ce /workflows:plan
-
-# Multi-agent review (batch mode)
-~/compound-engineering/ce /workflows:review
-
-# Sequential agent prompts (if desired)
-~/compound-engineering/ce --mode sequential /workflows:review
+git clone git@github.com:metonymize-kripa/compound-engineering-with-exe.dev.git ~/compound-engineering
 ```
 
-This reads `compound-engineering.local.md` in your project to choose review agents. If missing, a default file is created.
+## Setup (per project)
 
-## Mental Model
+```bash
+cd /path/to/project
+~/compound-engineering/install.sh
+```
 
-Think of Compound Engineering as **a shared playbook + per‑project journals**.
+This copies:
+- `AGENTS.md`
+- `CLAUDE.md`
+- `TODO.md`
+- `docs/`
 
-### 1) The playbook (this repo)
-- Contains reusable **commands**, **agents**, and **skills**.
-- Lives at `~/compound-engineering` on each VM.
-- You update this repo when you improve the playbook.
+## Run commands with Shelley
 
-### 2) Per‑project state (your code repo)
-When you run `install.sh` inside a project, it **copies** these files into the project by default:
-- `AGENTS.md` — workflow/agent rules for this project
-- `CLAUDE.md` — behavioral rules
-- `TODO.md` — the task queue for the project
-- `docs/` — skill notes and artifacts (your “journal”)
+```bash
+~/compound-engineering/ce /workflows:plan
+~/compound-engineering/ce /workflows:review
+```
 
-This matches the upstream approach: each project owns its own skills and notes, and they get committed with the project.
+## Promote skills to the playbook
 
-### 3) How learnings are stored
-- During `/workflows:compound`, you write a new `docs/skills/*.md` file.
-- Those learnings live **inside the project repo** and get committed with it.
-- If you want to share learnings globally, copy them into the playbook repo manually.
+```bash
+~/compound-engineering/ce diff-skills /path/to/project
+~/compound-engineering/ce promote-skill /path/to/project docs/skills/my-skill.md
+```
 
-### 4) Avoiding cross‑project conflicts
-- **Project‑specific** learnings are the default (copy mode).
-- If you want **global** learnings, run `install.sh --mode link` and commit changes in the playbook repo.
-
-### 5) Workflow in practice
-1. Clone playbook repo to VM
-2. Run `install.sh` inside project (creates symlinks)
-3. Use `ce` to run commands and generate prompts
-4. Commit playbook updates **in the playbook repo** (not the project) if you want them shared
-
-## Copy vs Link
-
-- **Copy (default):** per‑project files, committed with each repo. This matches the upstream Compound Engineering approach.
-- **Link:** shared global playbook across projects (advanced). Use `install.sh --mode link`.
+## References
+- https://github.com/EveryInc/compound-engineering-plugin
+- https://every.to/guides/compound-engineering

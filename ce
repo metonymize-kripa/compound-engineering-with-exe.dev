@@ -2,12 +2,14 @@
 set -euo pipefail
 
 CE_DIR="${CE_DIR:-$HOME/compound-engineering}"
-COMMAND_PATH=""
 MODE="batch"
 
 usage() {
   cat <<EOF
-Usage: ce [options] /command
+Usage:
+  ce [options] /command
+  ce diff-skills /path/to/project
+  ce promote-skill /path/to/project docs/skills/skill-name.md
 
 Options:
   --ce-dir DIR     Path to compound-engineering repo (default: ~/compound-engineering)
@@ -17,6 +19,8 @@ Options:
 Examples:
   ce /workflows:plan
   ce --mode sequential /workflows:review
+  ce diff-skills /path/to/project
+  ce promote-skill /path/to/project docs/skills/my-skill.md
 EOF
 }
 
@@ -37,6 +41,32 @@ while [[ $# -gt 0 ]]; do
       ;;
     -h|--help)
       usage
+      exit 0
+      ;;
+    diff-skills)
+      PROJECT_DIR="$2"
+      if [[ -z "${PROJECT_DIR:-}" ]]; then
+        echo "Missing project path" >&2
+        exit 1
+      fi
+      diff -ru "$CE_DIR/docs/skills" "$PROJECT_DIR/docs/skills" || true
+      exit 0
+      ;;
+    promote-skill)
+      PROJECT_DIR="$2"
+      SKILL_PATH="$3"
+      if [[ -z "${PROJECT_DIR:-}" || -z "${SKILL_PATH:-}" ]]; then
+        echo "Usage: ce promote-skill /path/to/project docs/skills/skill-name.md" >&2
+        exit 1
+      fi
+      if [[ ! -f "$PROJECT_DIR/$SKILL_PATH" ]]; then
+        echo "Skill not found: $PROJECT_DIR/$SKILL_PATH" >&2
+        exit 1
+      fi
+      mkdir -p "$CE_DIR/$(dirname "$SKILL_PATH")"
+      cp "$PROJECT_DIR/$SKILL_PATH" "$CE_DIR/$SKILL_PATH"
+      echo "✅ Promoted $SKILL_PATH to $CE_DIR"
+      git -C "$CE_DIR" status --short
       exit 0
       ;;
     *)
@@ -119,26 +149,14 @@ read_file "$command_file"
 
 if [[ ${#review_agents[@]} -gt 0 ]]; then
   printf "\n# Review Agents\n"
-  if [[ "$MODE" == "batch" ]]; then
-    for agent in "${review_agents[@]}"; do
-      agent_file="$CE_DIR/agents/review/$agent.md"
-      if [[ -f "$agent_file" ]]; then
-        read_file "$agent_file"
-      else
-        echo "Missing agent file: $agent_file" >&2
-      fi
-    done
-  else
-    for agent in "${review_agents[@]}"; do
-      agent_file="$CE_DIR/agents/review/$agent.md"
-      if [[ -f "$agent_file" ]]; then
-        printf "\n# Agent: %s\n" "$agent"
-        read_file "$agent_file"
-      else
-        echo "Missing agent file: $agent_file" >&2
-      fi
-    done
-  fi
+  for agent in "${review_agents[@]}"; do
+    agent_file="$CE_DIR/agents/review/$agent.md"
+    if [[ -f "$agent_file" ]]; then
+      read_file "$agent_file"
+    else
+      echo "Missing agent file: $agent_file" >&2
+    fi
+  done
 fi
 
 printf "\n# Notes\n"
