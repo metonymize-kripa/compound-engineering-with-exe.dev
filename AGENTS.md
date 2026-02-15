@@ -24,3 +24,8 @@
 1. What was harder than expected? Document the solution in a new `docs/skills/SKILL_NAME.md`.
 2. Update `AGENTS.md` if a new persona or rule is discovered.
 3. Mark task as complete in `TODO.md`.
+
+## Local Agents
+
+This repo includes local copies of Compound Engineering agents under `agents/`.
+These are pulled from the upstream plugin so you can modify them without cloud plugins.

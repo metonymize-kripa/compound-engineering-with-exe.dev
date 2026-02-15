@@ -25,6 +25,10 @@ Compound Engineering is a lightweight workflow for long-running projects. It mak
    - Use `/workflows:review` for a multi-perspective audit.
    - Use `/workflows:compound` to capture residual value into `docs/skills/`.
 
+4. **Use local agents** (offline-friendly):
+   - Local copies live in `agents/`.
+   - See `AGENTS_INDEX.md` for a quick list.
+
 ## Conventions
 
 - **Atomic commits**: small, verifiable changes.
