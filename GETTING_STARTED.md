@@ -56,3 +56,20 @@ Compound Engineering is a lightweight workflow for long-running projects. It mak
 ---
 
 If you want a one-liner bootstrap or a template repo for new projects, open an issue and we’ll add it.
+
+## Local Command Runner (Shelley)
+
+Use the `ce` script to expand Compound Engineering commands into a Shelley-ready prompt.
+
+```bash
+# From any project directory with compound-engineering linked
+~/compound-engineering/ce /workflows:plan
+
+# Multi-agent review (batch mode)
+~/compound-engineering/ce /workflows:review
+
+# Sequential agent prompts (if desired)
+~/compound-engineering/ce --mode sequential /workflows:review
+```
+
+This reads `compound-engineering.local.md` in your project to choose review agents. If missing, a default file is created.

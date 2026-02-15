@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CE_DIR="${CE_DIR:-$HOME/compound-engineering}"
+COMMAND_PATH=""
+MODE="batch"
+
+usage() {
+  cat <<EOF
+Usage: ce [options] /command
+
+Options:
+  --ce-dir DIR     Path to compound-engineering repo (default: ~/compound-engineering)
+  --mode MODE      batch or sequential (default: batch)
+  -h, --help       Show help
+
+Examples:
+  ce /workflows:plan
+  ce --mode sequential /workflows:review
+EOF
+}
+
+if [[ $# -eq 0 ]]; then
+  usage
+  exit 1
+fi
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --ce-dir)
+      CE_DIR="$2"
+      shift 2
+      ;;
+    --mode)
+      MODE="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      COMMAND_PATH="$1"
+      shift
+      ;;
+  esac
+done
+
+if [[ ! -d "$CE_DIR" ]]; then
+  echo "Compound Engineering repo not found at $CE_DIR" >&2
+  echo "Run: git clone git@github.com:metonymize-kripa/compound-engineering-with-exe.dev.git $CE_DIR" >&2
+  exit 1
+fi
+
+normalize_command() {
+  local cmd="$1"
+  cmd="${cmd#/}"
+  cmd="${cmd//:/\/}"
+  echo "$cmd"
+}
+
+command_file="$CE_DIR/commands/$(normalize_command "$COMMAND_PATH").md"
+if [[ ! -f "$command_file" ]]; then
+  echo "Command not found: $command_file" >&2
+  exit 1
+fi
+
+settings_file="./compound-engineering.local.md"
+if [[ ! -f "$settings_file" ]]; then
+  cat <<EOF > "$settings_file"
+---
+review_agents:
+  - security-sentinel
+  - performance-oracle
+  - architecture-strategist
+  - code-simplicity-reviewer
+---
+
+Add optional review context below this line.
+EOF
+fi
+
+read_file() {
+  local path="$1"
+  echo "\n===== BEGIN $path ====="
+  cat "$path"
+  echo "\n===== END $path ====="
+}
+
+extract_review_agents() {
+  python3 - <<'PY'
+import re, pathlib, sys
+text = pathlib.Path("compound-engineering.local.md").read_text()
+match = re.search(r"---(.*?)---", text, re.S)
+if not match:
+    sys.exit(0)
+frontmatter = match.group(1)
+agents = []
+for line in frontmatter.splitlines():
+    line = line.strip()
+    if line.startswith("-"):
+        agents.append(line.lstrip("-").strip())
+for agent in agents:
+    print(agent)
+PY
+}
+
+review_agents=()
+if [[ "$COMMAND_PATH" == "/workflows:review" ]]; then
+  while IFS= read -r agent; do
+    review_agents+=("$agent")
+  done < <(extract_review_agents)
+fi
+
+printf "# Compound Engineering Command\n"
+printf "Command: %s\n" "$COMMAND_PATH"
+printf "Mode: %s\n" "$MODE"
+read_file "$command_file"
+
+if [[ ${#review_agents[@]} -gt 0 ]]; then
+  printf "\n# Review Agents\n"
+  if [[ "$MODE" == "batch" ]]; then
+    for agent in "${review_agents[@]}"; do
+      agent_file="$CE_DIR/agents/review/$agent.md"
+      if [[ -f "$agent_file" ]]; then
+        read_file "$agent_file"
+      else
+        echo "Missing agent file: $agent_file" >&2
+      fi
+    done
+  else
+    for agent in "${review_agents[@]}"; do
+      agent_file="$CE_DIR/agents/review/$agent.md"
+      if [[ -f "$agent_file" ]]; then
+        printf "\n# Agent: %s\n" "$agent"
+        read_file "$agent_file"
+      else
+        echo "Missing agent file: $agent_file" >&2
+      fi
+    done
+  fi
+fi
+
+printf "\n# Notes\n"
+printf "Paste this output into Shelley to run the command with agent context.\n"
