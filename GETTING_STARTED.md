@@ -44,14 +44,10 @@ Compound Engineering is a lightweight workflow for long-running projects. It mak
 
 ## More from Every
 
-If you want deeper context, here are relevant sources from the Every team:
-
 - **Compound Engineering Plugin (source):**
   https://github.com/EveryInc/compound-engineering-plugin
-- **Every Inc GitHub (open-source work):**
-  https://github.com/EveryInc
-- **Every’s publication (engineering, product, and AI writing):**
-  https://every.to/
+- **Compound Engineering Guide:**
+  https://every.to/guides/compound-engineering
 
 ---
 
