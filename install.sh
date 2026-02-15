@@ -5,6 +5,7 @@ REPO_URL="git@github.com:metonymize-kripa/compound-engineering-with-exe.dev.git"
 CE_DIR="$HOME/compound-engineering"
 PROJECT_DIR="$(pwd)"
 FORCE=0
+MODE="copy"
 
 usage() {
   cat <<EOF
@@ -12,12 +13,13 @@ Usage: $(basename "$0") [options] [project_dir]
 
 Options:
   -c, --ce-dir DIR   Path to compound-engineering repo (default: ~/compound-engineering)
-  -f, --force        Overwrite existing files/symlinks
+  -m, --mode MODE    copy (default) or link
+  -f, --force        Overwrite existing files
   -h, --help         Show help
 
 Examples:
   $(basename "$0")
-  $(basename "$0") /path/to/project
+  $(basename "$0") --mode link /path/to/project
   $(basename "$0") -c /opt/compound-engineering -f /path/to/project
 EOF
 }
@@ -26,6 +28,10 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -c|--ce-dir)
       CE_DIR="$2"
+      shift 2
+      ;;
+    -m|--mode)
+      MODE="$2"
       shift 2
       ;;
     -f|--force)
@@ -50,7 +56,7 @@ else
   git -C "$CE_DIR" pull --ff-only
 fi
 
-link_item() {
+install_item() {
   local src="$1"
   local dest="$2"
 
@@ -63,14 +69,26 @@ link_item() {
     fi
   fi
 
-  ln -s "$src" "$dest"
+  if [[ "$MODE" == "link" ]]; then
+    ln -s "$src" "$dest"
+  else
+    if [[ -d "$src" ]]; then
+      cp -R "$src" "$dest"
+    else
+      cp "$src" "$dest"
+    fi
+  fi
 }
 
 mkdir -p "$PROJECT_DIR"
 
-link_item "$CE_DIR/AGENTS.md" "$PROJECT_DIR/AGENTS.md"
-link_item "$CE_DIR/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md"
-link_item "$CE_DIR/TODO.md" "$PROJECT_DIR/TODO.md"
-link_item "$CE_DIR/docs" "$PROJECT_DIR/docs"
+install_item "$CE_DIR/AGENTS.md" "$PROJECT_DIR/AGENTS.md"
+install_item "$CE_DIR/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md"
+install_item "$CE_DIR/TODO.md" "$PROJECT_DIR/TODO.md"
+install_item "$CE_DIR/docs" "$PROJECT_DIR/docs"
 
-echo "✅ Compound Engineering linked into $PROJECT_DIR"
+if [[ "$MODE" == "link" ]]; then
+  echo "✅ Compound Engineering linked into $PROJECT_DIR"
+else
+  echo "✅ Compound Engineering copied into $PROJECT_DIR"
+fi

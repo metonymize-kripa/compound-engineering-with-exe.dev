@@ -17,6 +17,8 @@ cd /path/to/project
 ~/compound-engineering/install.sh
 ```
 
+By default, the installer **copies** files into your project (per‑project skills). Use `--mode link` for a global shared playbook.
+
 ## Running commands with Shelley
 
 ```bash

@@ -84,25 +84,30 @@ Think of Compound Engineering as **a shared playbook + per‑project journals**.
 - You update this repo when you improve the playbook.
 
 ### 2) Per‑project state (your code repo)
-When you run `install.sh` inside a project, it **symlinks** these files into the project:
+When you run `install.sh` inside a project, it **copies** these files into the project by default:
 - `AGENTS.md` — workflow/agent rules for this project
 - `CLAUDE.md` — behavioral rules
 - `TODO.md` — the task queue for the project
 - `docs/` — skill notes and artifacts (your “journal”)
 
-These symlinks mean the files live in the playbook repo, not duplicated in the project. You **can** commit them in your project if you want, but by default they point back to the playbook.
+This matches the upstream approach: each project owns its own skills and notes, and they get committed with the project.
 
 ### 3) How learnings are stored
 - During `/workflows:compound`, you write a new `docs/skills/*.md` file.
-- Because `docs/` is symlinked, those learnings are written **back into the playbook**.
-- That means improvements become reusable across projects and VMs once you push/pull this repo.
+- Those learnings live **inside the project repo** and get committed with it.
+- If you want to share learnings globally, copy them into the playbook repo manually.
 
 ### 4) Avoiding cross‑project conflicts
-- If you want **project‑specific** learnings, remove the symlink and keep a local `docs/` in the project.
-- If you want **global** learnings, keep the symlink and commit changes in the playbook repo.
+- **Project‑specific** learnings are the default (copy mode).
+- If you want **global** learnings, run `install.sh --mode link` and commit changes in the playbook repo.
 
 ### 5) Workflow in practice
 1. Clone playbook repo to VM
 2. Run `install.sh` inside project (creates symlinks)
 3. Use `ce` to run commands and generate prompts
 4. Commit playbook updates **in the playbook repo** (not the project) if you want them shared
+
+## Copy vs Link
+
+- **Copy (default):** per‑project files, committed with each repo. This matches the upstream Compound Engineering approach.
+- **Link:** shared global playbook across projects (advanced). Use `install.sh --mode link`.
